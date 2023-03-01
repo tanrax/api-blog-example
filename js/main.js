@@ -8,10 +8,12 @@ const marcadorDOM = document.querySelector("#marcador");
 const singleDOM = document.querySelector("#single-blog");
 const singleTitleDOM = document.querySelector("#single-blog__title");
 const singleContentDOM = document.querySelector("#single-blog__content");
+const templateComment = document.querySelector("#comment-item").content.firstElementChild;
+const singleCommentsListadoDOM = document.querySelector("#single-blog__comments");
 const botonVolverDOM = document.querySelector("#boton-volver");
 // - Data
 let articulos = [];
-
+let comments = [];
 // 2 estados: "listado articulos" y "single articulo"
 let estado = "listado articulos";
 // - Paginado
@@ -58,6 +60,22 @@ function renderizar() {
 	});
 	// Insertamos en el listado
 	listadoArticulosDOM.appendChild(miArticulo);
+    });
+    // Limpiamos los comentarios anteriores
+    singleCommentsListadoDOM.innerHTML = "";
+    // Lista de comentarios
+    comments.forEach(function(comment) {
+	// Clonamos plantilla
+	const miComentario = templateComment.cloneNode(true);
+	// Modificamos datos
+	const name = miComentario.querySelector("#comment__name");
+	name.textContent = comment.name;
+	const email = miComentario.querySelector("#comment__email");
+	email.textContent = comment.email;
+	const body = miComentario.querySelector("#comment__body");
+	body.textContent = comment.body;
+	// Insertamos en el listado de comentarios
+	singleCommentsListadoDOM.appendChild(miComentario);
     });
 }
 
@@ -127,6 +145,10 @@ async function obtenerSingleArticulo(id) {
     // Modificamos el HTML de single
     singleTitleDOM.textContent = json.title;
     singleContentDOM.textContent = json.body;
+    // Obtener comentarios del articulo
+    const miFetchComments = await fetch(`${urlAPI}posts/${id}/comments`);
+    // Transforma la respuesta. En este caso lo convierte a JSON
+    comments = await miFetchComments.json();
     // Al terminar los datos, quita loading
     cambiarEstado("single articulo");
 }
